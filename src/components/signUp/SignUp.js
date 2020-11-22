@@ -1,5 +1,5 @@
 import React, { useRef, useState } from 'react'
-import { Alert, Button, Container, Card, Form, InputGroup } from 'react-bootstrap'
+import { Alert, Button, Container, Card, Form, InputGroup, Spinner } from 'react-bootstrap'
 import ReCAPTCHA from 'react-google-recaptcha';
 import { Link, useHistory } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
@@ -15,13 +15,13 @@ export default function SignUp() {
   const confirmPassowrdRef = useRef()
   const captchaRef = useRef()
 
-  const defaultErrors = {
+  const defaults = {
     message: "",
     data: [],
     show: false
   }
 
-  const [error, setError] = useState(defaultErrors)
+  const [error, setError] = useState(defaults)
   const [loading, setLoading] = useState(false)
 
   const { signUp } = useAuth()
@@ -45,7 +45,7 @@ export default function SignUp() {
     }
 
     try {
-      setError(defaultErrors)
+      setError(defaults)
       setLoading(true)
       let response = await signUp(data)
       console.log(response)
@@ -127,12 +127,12 @@ export default function SignUp() {
                   </InputGroup.Prepend>
                   <Form.Control 
                     className="col-3" 
-                    type="text" 
+                    type="tel" 
                     ref={contryCodeRef}
                     required
                     isInvalid={!!error.data && !!error.data.countryCode} />
                   <Form.Control 
-                    type="text" 
+                    type="tel" 
                     ref={phoneNumberRef}
                     required
                     isInvalid={!!error.data && !!error.data.phoneNumber} />
@@ -181,7 +181,22 @@ export default function SignUp() {
               <Form.Group id="recaptcha">
                 <ReCAPTCHA sitekey="6LfreLQZAAAAAI7rloxhlVtP5j3fN_vKaP76ymSQ" ref={captchaRef} onChange={verify} />
               </Form.Group>
-              <Button className="w-100" type="submit" disabled={loading}>Sign Up</Button>
+              <Button className="w-100" type="submit" disabled={loading}>
+                {loading ? <>
+                  <Spinner
+                    as="span"
+                    animation="border"
+                    size="sm"
+                    role="status"
+                    aria-hidden="true"
+                  />
+                  <span className="sr-only">Loading...</span>
+                </>
+                :
+                <>
+                  Sign Up
+                </>}
+              </Button>
             </Form>
           </Card.Body>
         </Card>

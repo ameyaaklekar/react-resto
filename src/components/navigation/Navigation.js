@@ -11,10 +11,14 @@ import Login from '../login/Login';
 import Dashboard from '../dashboard/Dashboard';
 import NotFound from '../notFound/NotFound';
 import PreferenceNav from './PreferenceNav';
+import { usePermission } from '../../context/PermissionContext';
+import { PermissionConstants } from '../../constants/PermissionConstant';
 
 export default function Navigation() {
 
   const { currentUser, logout } = useAuth()
+  const { checkPermissions } = usePermission()
+
   const history = useHistory()
   const location = useLocation();
 
@@ -33,7 +37,9 @@ export default function Navigation() {
           <Nav defaultActiveKey={location.pathname} className="d-flex w-100">
           {currentUser ? <>
             <Nav.Link as={Link} to="/" eventKey="/">Dashboard</Nav.Link>
+            {checkPermissions(PermissionConstants.VIEW_SUPPLIER) &&
             <Nav.Link as={Link} to="/suppliers" eventKey="/suppliers">Suppliers</Nav.Link>
+            }
             </>
             :
             <Nav.Link as={Link} to="/sign-up" eventKey="/sign-up">Register</Nav.Link>

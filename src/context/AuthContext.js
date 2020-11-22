@@ -61,6 +61,20 @@ export function AuthProvider({ children }) {
     setCurrentUser(null)
   }
 
+  async function updateUser (data) {
+    try {
+      let response = await axios.put("user", data)
+      if (response.data.success) {
+        setCurrentUser(response.data.data)
+      }
+      return response.data
+    } catch (e) {
+      if (e.response.data.errors) {
+        return e.response.data
+      }
+    }
+  }
+
   useEffect(() => {
     getUser().then((unsubscribe) => {
       setuserLoading(false)
@@ -73,7 +87,8 @@ export function AuthProvider({ children }) {
     signUp,
     login,
     getUser,
-    logout
+    logout,
+    updateUser
   }
   return (
     <AuthContext.Provider value={value}>

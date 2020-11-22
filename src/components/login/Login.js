@@ -1,5 +1,5 @@
 import React, { useRef, useState } from 'react'
-import { Alert, Button, Container, Card, Form } from 'react-bootstrap'
+import { Alert, Button, Container, Card, Form, Spinner } from 'react-bootstrap'
 import { Link, useHistory } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 
@@ -29,8 +29,12 @@ export default function Login() {
 
     try {
       setError(defaultErrors)
+      setLoading(true)
+
       let response = await login(data)
-      if (!response.success) {
+      if (response.success) {
+        history.push('/')
+      } else {
         setError({
           message: response.message,
           data: response.errors,
@@ -81,7 +85,22 @@ export default function Login() {
                     {error.data.password}
                   </Form.Control.Feedback>
               </Form.Group>
-              <Button className="w-100" type="submit" disabled={loading}>Login</Button>
+              <Button className="w-100" type="submit" disabled={loading}>
+                {loading ? <>
+                  <Spinner
+                    as="span"
+                    animation="border"
+                    size="sm"
+                    role="status"
+                    aria-hidden="true"
+                  />
+                  <span className="sr-only">Loading...</span>
+                </>
+                :
+                <>
+                  Login
+                </>}
+              </Button>
             </Form>
           </Card.Body>
         </Card>
