@@ -1,8 +1,13 @@
-import React from 'react';
-import ReactDOM from 'react-dom';
-import './index.css';
-import App from './App';
-import reportWebVitals from './reportWebVitals';
+import React from 'react'
+import ReactDOM from 'react-dom'
+import App from './components/App'
+import reportWebVitals from './reportWebVitals'
+import axios from "axios"
+import "./assets/scss/main.scss"
+
+axios.defaults.baseURL = "http://localhost:5000/api"
+axios.defaults.headers.common["Content-Type"] = "application/json"
+axios.defaults.headers.common["Accept"] = "application/json"
 
 ReactDOM.render(
   <React.StrictMode>
