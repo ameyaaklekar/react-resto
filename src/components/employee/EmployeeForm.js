@@ -55,6 +55,7 @@ export default function EmployeeForm({ submitAction, employee}) {
 	}, this);
 
   useEffect(() => {
+    console.log('here')
     if (employee && employee.permissions.length > 0) setSelectedPermissions(employee.permissions)
 
     getRoles().then((response) => {

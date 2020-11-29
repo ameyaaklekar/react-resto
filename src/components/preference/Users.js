@@ -32,7 +32,6 @@ export default function Users() {
 
   async function editEmployee(employeeId) {
     let response = await getEmployee(employeeId)
-    console.log(response)
     if (response.success) {
       setEmployeeToEdit(response.data)
       setModalShow(true)
