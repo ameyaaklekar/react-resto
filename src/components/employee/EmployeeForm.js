@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react'
 import { Container, Row, Col, Alert, Button, Form, InputGroup, Spinner } from 'react-bootstrap';
 import { useEmployee } from '../../context/EmployeeContext';
+import PermissionsForm from './PermissionsForm';
 
 export default function EmployeeForm({ submitAction, employee}) {
   const firstNameRef = useRef()
@@ -27,7 +28,6 @@ export default function EmployeeForm({ submitAction, employee}) {
   const [roles, setRoles] = useState([])
   const [permissions, setPermissions] = useState([])
   const [selectedPermissions, setSelectedPermissions] = useState([])
-  const [permissionsCheckbox, setPermissionsCheckbox] = useState([])
 
   const { getRoles, getPermissions, getRolePermission } = useEmployee()
 
@@ -43,34 +43,8 @@ export default function EmployeeForm({ submitAction, employee}) {
     const response = await getRolePermission(role)
     if (response.success) {
       setSelectedPermissions(response.data)
-      renderPermissions()
     }
   }
-
-  function renderPermissions() {
-    const permissionsCheckBox = [] 
-    
-    permissions.length > 0 
-      && permissions.map((permission) => {
-        let selected = selectedPermissions.length > 0 
-          && selectedPermissions.filter((selected) => selected.codeName == permission.codeName)
-          permissionsCheckBox.push(
-          <Col md="6">
-            <Form.Check
-              type="switch"
-              name="permissions"
-              label={permission.name}
-              value={permission.codeName}
-              defaultChecked={selected.length > 0}
-              name="permissions"
-            /> 
-          </Col>
-        )
-      })
-
-    setPermissionsCheckbox(permissionsCheckBox)
-  }
-  
 
   const rolesOptions = roles.length > 0
 		&& roles.map((role) => {
@@ -87,7 +61,6 @@ export default function EmployeeForm({ submitAction, employee}) {
       setRoles(response.data)
       getPermissions().then((response) => {
         setPermissions(response.data)
-        return response
       })
     })
   }, [])
@@ -273,7 +246,10 @@ export default function EmployeeForm({ submitAction, employee}) {
           <Col md="8">
             <h5>Permissions</h5>
             <Row>
-              {permissionsCheckbox}
+              <PermissionsForm 
+                selectedPermissions={selectedPermissions}
+                permissions={permissions}
+              />
             </Row>
           </Col>
           }
