@@ -1,8 +1,10 @@
-import React, { useEffect, useMemo, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import { Col,Form } from 'react-bootstrap';
 
 export default function PermissionsForm({ permissions, selectedPermissions }) {
 
+  const [checkboxState, setCheckboxState] = useState([])
+  
   const renderCheckbox = (selectedData) => {
     const checkbox = []
 
@@ -21,22 +23,22 @@ export default function PermissionsForm({ permissions, selectedPermissions }) {
     return checkbox
   }
 
-  const data = useMemo(() => {
-    return renderCheckbox(selectedPermissions)
+  useMemo(() => {
+    let permissionsCheckbox = renderCheckbox(selectedPermissions)
+    setCheckboxState(permissionsCheckbox)
   }, [selectedPermissions])
 
   return (
     <>
-      {data.length > 0 && data.map((checkbox) => ( 
+      {checkboxState.length && checkboxState.map((checkbox) => ( 
         <Col md="6" key={checkbox.id}>
-          <Form.Check
-            type="checkbox"
+          <input type="checkbox" 
             name="permissions"
             label={checkbox.name}
             value={checkbox.codeName}
-            checked={checkbox.checked}
-            name="permissions"
-          /> 
+            defaultChecked={checkbox.checked}
+            /> 
+            {checkbox.name}
         </Col>
       ))}
     </>
