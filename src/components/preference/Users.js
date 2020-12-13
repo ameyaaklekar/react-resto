@@ -38,10 +38,6 @@ export default function Users() {
     }
   }
 
-  async function handleSubmit(data) {
-    console.log('i made it')
-  }
-
   return (
     <>
       <Table responsive>
@@ -67,7 +63,7 @@ export default function Users() {
                     type="switch"
                     id={employee.id}
                     label=""
-                    defaultChecked = {employee.status == 'A'}
+                    defaultChecked = {employee.status === 'A'}
                     onChange={(e) => updateEmployeeStatus(employee.id, e.target.checked)}
                   />               
                 </td>
@@ -85,7 +81,6 @@ export default function Users() {
         show={modalShow}
         onHide={() => { setModalShow(false) }}
         employee={employeeToEdit}
-        submitAction={handleSubmit}
         title="Edit Employee"
       />
     </>

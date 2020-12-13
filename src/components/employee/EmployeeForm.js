@@ -3,19 +3,9 @@ import { Container, Row, Col, Alert, Button, Form, InputGroup, Spinner } from 'r
 import { useEmployee } from '../../context/EmployeeContext';
 import PermissionsForm from './PermissionsForm';
 
-export default function EmployeeForm({ submitAction, employee}) {
-  const firstNameRef = useRef()
-  const lastNameRef = useRef()
-  const contryCodeRef = useRef()
-  const phoneNumberRef = useRef()
-  const emailRef = useRef()
-  const addressRef = useRef()
-  const cityRef = useRef()
-  const stateRef = useRef()
-  const postalCodeRef = useRef()
-  const countryRef = useRef()
-  const roleRef = useRef()
+export default function EmployeeForm({ employee }) {
   const formRef = useRef()
+  const roleRef = useRef()
   
   const defaults = {
     message: "",
@@ -23,40 +13,94 @@ export default function EmployeeForm({ submitAction, employee}) {
     show: false
   }
 
+  const [success, setSuccess] = useState(defaults)
   const [error, setError] = useState(defaults)
   const [loading, setLoading] = useState(false)
   const [roles, setRoles] = useState([])
   const [permissions, setPermissions] = useState([])
-  const [selectedPermissions, setSelectedPermissions] = useState([])
+  const [employeePermissions, setEmployeePermissions] = useState([])
 
-  const { getRoles, getPermissions, getRolePermission } = useEmployee()
+  const { getRoles, getPermissions, getRolePermission, updateEmployee } = useEmployee()
 
   async function handleSubmit(e) {
     e.preventDefault(e)
-    const { permissions } = formRef.current
-    console.log(permissions)
-    // const response = submitAction(employee.id)
+    setSuccess(defaults)
+    setError(defaults)
+    setLoading(true)
+    
+    const { firstName,
+      lastName,
+      countryCode,
+      phoneNumber,
+      email,
+      address,
+      city,
+      state,
+      country,
+      postalCode,
+      role,
+      permissions
+    } = formRef.current
+
+    let permissionsArray = []
+
+    permissions.forEach((permission) => {
+      if (permission.checked) permissionsArray.push(permission.value)
+    })
+
+    const formData = {
+      firstName: firstName.value,
+      lastName: lastName.value,
+      countryCode: countryCode.value,
+      phoneNumber: phoneNumber.value,
+      email: email.value,
+      address: address.value,
+      city: city.value,
+      state: state.value,
+      country: country.value,
+      postalCode: postalCode.value,
+      role: role.value,
+      permissions: permissionsArray,
+      employeeId: employee.id
+    }
+
+    let response = await updateEmployee(formData)
+    if (response.success) {
+      setSuccess({
+        message: response.message,
+        data: response.data,
+        show: true
+      })
+    } else {
+      setError({
+        message: response.message,
+        data: response.errors,
+        show: true
+      })
+    }
+
+    setLoading(false)
   }
 
   async function handleOnRoleChange(e) {
     const role = roleRef.current.value
     const response = await getRolePermission(role)
-    if (response.success) {
-      setSelectedPermissions(response.data)
+
+    if (response && response.success) {
+      setEmployeePermissions(response.data)
     }
   }
 
   const rolesOptions = roles.length > 0
 		&& roles.map((role) => {
-    let selected = (employee && employee.roles[0].codeName == role.codeName)
+    let selected = (employee && employee.roles[0].codeName === role.codeName)
 		return (
 			<option key={role.id} value={role.codeName} selected={selected}>{role.name}</option>
 		)
 	}, this);
 
   useEffect(() => {
-    console.log('here')
-    if (employee && employee.permissions.length > 0) setSelectedPermissions(employee.permissions)
+    if (employee && employee.permissions.length > 0) setEmployeePermissions(employee.permissions)
 
     getRoles().then((response) => {
       setRoles(response.data)
@@ -75,14 +119,22 @@ export default function EmployeeForm({ submitAction, employee}) {
           </Col>
         </Row>
       }
+
+      {success.show && 
+        <Row>
+          <Col>
+            <Alert variant="success">{success.message}</Alert>
+          </Col>
+        </Row>
+      }
       <Form onSubmit={handleSubmit} ref={formRef}>
         <Row>
           <Col md="4">
             <Form.Group id="firstName">
               <Form.Label>First Name</Form.Label>
               <Form.Control 
-                type="text" 
-                ref={firstNameRef}
+                type="text"
+                name="firstName"
                 defaultValue={employee.firstName}
                 required
                 isInvalid={!!error.data && !!error.data.firstName} />
@@ -96,7 +148,7 @@ export default function EmployeeForm({ submitAction, employee}) {
               <Form.Label>Last Name</Form.Label>
               <Form.Control 
                 type="text" 
-                ref={lastNameRef}
+                name="lastName"
                 defaultValue={employee.lastName}
                 required
                 isInvalid={!!error.data && !!error.data.lastName} />
@@ -115,13 +167,13 @@ export default function EmployeeForm({ submitAction, employee}) {
                 <Form.Control 
                   className="col-3" 
                   type="tel" 
-                  ref={contryCodeRef}
+                  name="countryCode"
                   defaultValue={employee.countryCode}
                   required
                   isInvalid={!!error.data && !!error.data.countryCode} />
                 <Form.Control 
                   type="tel" 
-                  ref={phoneNumberRef}
+                  name="phoneNumber"
                   required
                   defaultValue={employee.phoneNumber}
                   isInvalid={!!error.data && !!error.data.phoneNumber} />
@@ -140,7 +192,7 @@ export default function EmployeeForm({ submitAction, employee}) {
               <Form.Label>Email</Form.Label>
               <Form.Control 
                 type="email" 
-                ref={emailRef}
+                name="email"
                 defaultValue={employee.email}
                 required
                 isInvalid={!!error.data && !!error.data.email} />
@@ -154,9 +206,8 @@ export default function EmployeeForm({ submitAction, employee}) {
               <Form.Label>Address</Form.Label>
               <Form.Control 
                 type="text" 
-                ref={addressRef}
+                name="address"
                 defaultValue={employee.address}
-                required
                 isInvalid={!!error.data && !!error.data.address} />
                 <Form.Control.Feedback type="invalid" >
                   {!!error.data && !!error.data.address && error.data.address}
@@ -168,9 +219,8 @@ export default function EmployeeForm({ submitAction, employee}) {
               <Form.Label>City</Form.Label>
               <Form.Control 
                 type="text" 
-                ref={cityRef}
+                name="city"
                 defaultValue={employee.city}
-                required
                 isInvalid={!!error.data && !!error.data.city} />
                 <Form.Control.Feedback type="invalid" >
                   {!!error.data && !!error.data.city && error.data.city}
@@ -185,9 +235,8 @@ export default function EmployeeForm({ submitAction, employee}) {
               <Form.Label>State</Form.Label>
               <Form.Control 
                 type="text" 
-                ref={stateRef}
+                name="state"
                 defaultValue={employee.state}
-                required
                 isInvalid={!!error.data && !!error.data.state} />
                 <Form.Control.Feedback type="invalid" >
                   {!!error.data && !!error.data.state && error.data.state}
@@ -199,9 +248,8 @@ export default function EmployeeForm({ submitAction, employee}) {
               <Form.Label>Post Code</Form.Label>
               <Form.Control 
                 type="text" 
-                ref={postalCodeRef}
+                name="postalCode"
                 defaultValue={employee.postalCode}
-                required
                 isInvalid={!!error.data && !!error.data.postalCode} />
                 <Form.Control.Feedback type="invalid" >
                   {!!error.data && !!error.data.postalCode && error.data.postalCode}
@@ -213,9 +261,8 @@ export default function EmployeeForm({ submitAction, employee}) {
               <Form.Label>Country</Form.Label>
               <Form.Control 
                 type="text" 
-                ref={countryRef}
+                name="country"
                 defaultValue={employee.country}
-                required
                 isInvalid={!!error.data && !!error.data.country} />
                 <Form.Control.Feedback type="invalid" >
                   {!!error.data && !!error.data.country && error.data.country}
@@ -236,6 +283,7 @@ export default function EmployeeForm({ submitAction, employee}) {
             <Form.Group id="roles">
               <Form.Control as="select" defaultValue="test"
                 ref={roleRef}
+                name="role"
                 onChange={handleOnRoleChange}
                 custom>
                   <option value="" key="default">Select a role</option>
@@ -248,7 +296,7 @@ export default function EmployeeForm({ submitAction, employee}) {
             <h5>Permissions</h5>
             <Row>
               <PermissionsForm 
-                selectedPermissions={selectedPermissions}
+                employeePermissions={employeePermissions}
                 permissions={permissions}
               />
             </Row>
@@ -257,22 +305,32 @@ export default function EmployeeForm({ submitAction, employee}) {
           
         </Row>
 
-        <Button className="w-100" type="submit" disabled={loading}>
-          {loading ? <>
-            <Spinner
-              as="span"
-              animation="border"
-              size="sm"
-              role="status"
-              aria-hidden="true"
-            />
-            <span className="sr-only">Loading...</span>
-          </>
-          :
-          <>
-            Save
-          </>}
-        </Button>
+        <Row>
+          <Col>
+            <hr/>
+          </Col>
+        </Row>
+
+        <Row>
+          <Col>
+            <Button type="submit" disabled={loading} block>
+              {loading ? <>
+                <Spinner
+                  as="span"
+                  animation="border"
+                  size="sm"
+                  role="status"
+                  aria-hidden="true"
+                />
+                <span className="sr-only">Loading...</span>
+              </>
+              :
+              <>
+                Save
+              </>}
+            </Button>
+          </Col>
+        </Row>
       </Form>
     </Container>
   )

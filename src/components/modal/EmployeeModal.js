@@ -1,5 +1,5 @@
 import React from 'react'
-import { Button, Modal } from 'react-bootstrap';
+import { Modal } from 'react-bootstrap';
 import EmployeeForm from '../employee/EmployeeForm';
 
 export default function EmployeeModal(props) {
@@ -18,11 +18,8 @@ export default function EmployeeModal(props) {
       <Modal.Body className="show-grid">
         <EmployeeForm 
           employee={props.employee}
-          submitAction={props.submitAction}
         />
       </Modal.Body>
-      <Modal.Footer>
-      </Modal.Footer>
     </Modal>
   )
 }

@@ -1,7 +1,7 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react'
+import React, { useMemo, useState } from 'react'
 import { Col,Form } from 'react-bootstrap';
 
-export default function PermissionsForm({ permissions, selectedPermissions }) {
+export default function PermissionsForm({ permissions, employeePermissions }) {
 
   const [checkboxState, setCheckboxState] = useState([])
   
@@ -23,22 +23,39 @@ export default function PermissionsForm({ permissions, selectedPermissions }) {
     return checkbox
   }
 
+  const onChange = (event, index) => {
+
+    setCheckboxState(state => {
+      let checkboxes = state.map((checkbox, i) => {
+        if (i === index) {
+          checkbox.checked = event.target.checked
+          return checkbox;
+        } else {
+          return checkbox;
+        }
+      });
+
+      return checkboxes
+    })
+  }
+
   useMemo(() => {
-    let permissionsCheckbox = renderCheckbox(selectedPermissions)
+    let permissionsCheckbox = renderCheckbox(employeePermissions)
     setCheckboxState(permissionsCheckbox)
-  }, [selectedPermissions])
+  }, [employeePermissions])
 
   return (
     <>
-      {checkboxState.length && checkboxState.map((checkbox) => ( 
+      {checkboxState.length > 0 && checkboxState.map((checkbox, index) => ( 
         <Col md="6" key={checkbox.id}>
-          <input type="checkbox" 
+          <Form.Check
+            type="checkbox"
             name="permissions"
             label={checkbox.name}
             value={checkbox.codeName}
-            defaultChecked={checkbox.checked}
-            /> 
-            {checkbox.name}
+            checked={checkbox.checked}
+            onChange={(e) => { onChange(e, index) }}
+            />
         </Col>
       ))}
     </>

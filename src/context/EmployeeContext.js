@@ -31,6 +31,15 @@ export default function EmployeeProvider({ children }) {
     }
   }
 
+  async function updateEmployee(data) {
+    try {
+      let response = await axios.put("employee", data)
+      return response.data
+    } catch (e) {
+      return e.response.data
+    }
+  }
+
   async function getEmployee(employeeId) {
     try {
       let response = await axios.get("employee/" + employeeId)
@@ -91,7 +100,8 @@ export default function EmployeeProvider({ children }) {
     updateStatus,
     getRoles,
     getPermissions,
-    getRolePermission
+    getRolePermission,
+    updateEmployee
   }
 
   return (
