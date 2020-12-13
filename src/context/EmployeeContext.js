@@ -86,6 +86,15 @@ export default function EmployeeProvider({ children }) {
     }
   }
 
+  async function createEmployee(data) {
+    try {
+      let response = await axios.post("employee", data)
+      return response.data
+    } catch (e) {
+      return e.response.data
+    }
+  }
+
   useEffect(() => {
     getEmployees().then((response) => {
       setEmployeesLoading(false)
@@ -101,7 +110,8 @@ export default function EmployeeProvider({ children }) {
     getRoles,
     getPermissions,
     getRolePermission,
-    updateEmployee
+    updateEmployee,
+    createEmployee
   }
 
   return (

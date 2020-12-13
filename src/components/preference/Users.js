@@ -4,12 +4,18 @@ import { useEmployee } from '../../context/EmployeeContext';
 import { useAuth } from '../../context/AuthContext';
 import EmployeeModal from '../modal/EmployeeModal';
 
+export const modalView = {
+  MODE_EDIT: "edit",
+  MODE_NEW: "new",
+}
+
 export default function Users() {
 
   const { currentUser } = useAuth()
-  const { employees, updateStatus, getEmployee } = useEmployee()
+  const { employees, updateStatus, getEmployee, getEmployees } = useEmployee()
   const [modalShow, setModalShow] = useState(false);
   const [employeeToEdit, setEmployeeToEdit] = useState([])
+  const [mode, setMode] = useState(modalView.MODE_NEW)
 
   async function updateEmployeeStatus(employeeId, status) {
     let data = []
@@ -33,13 +39,27 @@ export default function Users() {
   async function editEmployee(employeeId) {
     let response = await getEmployee(employeeId)
     if (response.success) {
+      setMode(modalView.MODE_EDIT)
       setEmployeeToEdit(response.data)
       setModalShow(true)
     }
   }
 
+  async function createEmployee() {
+    setEmployeeToEdit([])
+    setMode(modalView.MODE_NEW)
+    setModalShow(true)
+  }
+
+  async function onHide() {
+    getEmployees()
+    setModalShow(false)
+  }
+
   return (
     <>
+      <Button variant="outline-primary" onClick={createEmployee}>Create New Employee</Button>
+      <hr/>
       <Table responsive>
         <thead>
           <tr>
@@ -79,9 +99,10 @@ export default function Users() {
       </Table>
       <EmployeeModal 
         show={modalShow}
-        onHide={() => { setModalShow(false) }}
+        onHide={onHide}
         employee={employeeToEdit}
-        title="Edit Employee"
+        mode={mode}
+        title={mode === modalView.MODE_EDIT ? "Edit Employee" : "Create Employee"}
       />
     </>
   )

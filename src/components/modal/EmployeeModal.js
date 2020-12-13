@@ -17,6 +17,7 @@ export default function EmployeeModal(props) {
       </Modal.Header>
       <Modal.Body className="show-grid">
         <EmployeeForm 
+          mode={props.mode}
           employee={props.employee}
         />
       </Modal.Body>

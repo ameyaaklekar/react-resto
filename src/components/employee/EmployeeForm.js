@@ -2,8 +2,9 @@ import React, { useEffect, useRef, useState } from 'react'
 import { Container, Row, Col, Alert, Button, Form, InputGroup, Spinner } from 'react-bootstrap';
 import { useEmployee } from '../../context/EmployeeContext';
 import PermissionsForm from './PermissionsForm';
+import { modalView } from '../preference/Users';
 
-export default function EmployeeForm({ employee }) {
+export default function EmployeeForm({ employee, mode }) {
   const formRef = useRef()
   const roleRef = useRef()
   
@@ -20,7 +21,7 @@ export default function EmployeeForm({ employee }) {
   const [permissions, setPermissions] = useState([])
   const [employeePermissions, setEmployeePermissions] = useState([])
 
-  const { getRoles, getPermissions, getRolePermission, updateEmployee } = useEmployee()
+  const { getRoles, getPermissions, getRolePermission, updateEmployee, createEmployee } = useEmployee()
 
   async function handleSubmit(e) {
     e.preventDefault(e)
@@ -64,7 +65,14 @@ export default function EmployeeForm({ employee }) {
       employeeId: employee.id
     }
 
-    let response = await updateEmployee(formData)
+    let response
+    
+    if (mode === modalView.MODE_EDIT) {
+      response = await updateEmployee(formData)
+    } else {
+      response = await createEmployee(formData)
+    }
+
     if (response.success) {
       setSuccess({
         message: response.message,
@@ -84,24 +92,30 @@ export default function EmployeeForm({ employee }) {
 
   async function handleOnRoleChange(e) {
     const role = roleRef.current.value
-    const response = await getRolePermission(role)
 
-    if (response && response.success) {
-      setEmployeePermissions(response.data)
+    if (role) {
+      const response = await getRolePermission(role)
+  
+      if (response && response.success) {
+        setEmployeePermissions(response.data)
+      }
+    } else {
+      setEmployeePermissions([])
     }
   }
 
   const rolesOptions = roles.length > 0
 		&& roles.map((role) => {
-    let selected = (employee && employee.roles[0].codeName === role.codeName)
+    let selected = (employee && employee.roles && employee.roles[0].codeName === role.codeName)
 		return (
 			<option key={role.id} value={role.codeName} selected={selected}>{role.name}</option>
 		)
 	}, this);
 
   useEffect(() => {
-    if (employee && employee.permissions.length > 0) setEmployeePermissions(employee.permissions)
-
+    if (mode === modalView.MODE_EDIT) {
+      if (employee && employee.permissions.length > 0) setEmployeePermissions(employee.permissions)
+    }
     getRoles().then((response) => {
       setRoles(response.data)
       getPermissions().then((response) => {
