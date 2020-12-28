@@ -1,8 +1,15 @@
 import React, { useRef, useState } from 'react'
-import { Alert, Button, Container, Card, Form, InputGroup, Col, Spinner, ListGroup } from 'react-bootstrap'
 import { useAuth } from '../../context/AuthContext';
 import { usePermission } from '../../context/PermissionContext';
 import { PermissionConstants } from '../../constants/PermissionConstant';
+
+import Grid from '@material-ui/core/Grid';
+import Typography from '@material-ui/core/Typography';
+import { makeStyles } from '@material-ui/core/styles';
+import { Avatar, Card, CardContent, CardHeader, CircularProgress, Divider, InputAdornment, List, ListItem, ListItemText } from '@material-ui/core';
+import Alert from '@material-ui/lab/Alert';
+import Button from '@material-ui/core/Button';
+import TextField from '@material-ui/core/TextField';
 
 export default function Profile() {
   const companyNameRef = useRef()
@@ -73,218 +80,294 @@ export default function Profile() {
     setLoading(false)
   }
 
+  const useStyles = makeStyles((theme) => ({
+    paper: {
+      marginTop: theme.spacing(8),
+      display: 'flex',
+      flexDirection: 'column',
+      alignItems: 'center',
+    },
+    avatar: {
+      margin: theme.spacing(1),
+      backgroundColor: theme.palette.secondary.main,
+      width: theme.spacing(8),
+      height: theme.spacing(8),
+    },
+    form: {
+      width: '100%', // Fix IE 11 issue.
+      marginTop: theme.spacing(3),
+    },
+    submit: {
+      margin: theme.spacing(3, 0, 2),
+    },
+    alert: {
+      margin: theme.spacing(1),
+      width: '100%',
+    },
+    detailsCard: {
+      minWidth: 275,
+      maxWidth: 500,
+    },
+  }));
+
+  const classes = useStyles();
+
   return (
     <>
       {checkPermissions(PermissionConstants.UPDATE_PROFILE) ? 
         <>
-          <Alert show={error.show} onClose={() => setError(defaults)} dismissible variant="danger">{error.message}</Alert>
-          <Alert show={success.show} onClose={() => setSuccess(defaults)} dismissible variant="success">{success.message}</Alert>
-          <Form onSubmit={handleSubmit}>
-            <Form.Row>
-              <Form.Group as={Col} sm="12" md="4" id="companyName">
-                <Form.Label>Company Name</Form.Label>
-                <Form.Control 
-                  type="text" 
+          {error.show && 
+            <Alert className={classes.alert} severity="error">{error.message}</Alert>
+          }
+          {success.show && 
+            <Alert className={classes.alert} severity="success">{success.message}</Alert>
+          }
+          <form className={classes.form} onSubmit={handleSubmit}>
+            <Grid container spacing={2}>
+              <Grid item xs={12} sm={4}>
+                <TextField
+                  variant="outlined"
+                  fullWidth
+                  id="company"
+                  label="Company"
+                  name="company"
+                  autoFocus
+                  inputRef={companyNameRef}
+                  error={!!error.data && !!error.data.company }
+                  helperText={!!error.data && !!error.data.company && error.data.company}
                   defaultValue={currentUser.company.name}
-                  disabled />
-              </Form.Group>
-
-              <Form.Group as={Col} sm="12" md="4" id="firstName">
-                <Form.Label>First Name</Form.Label>
-                <Form.Control 
-                  type="text" 
-                  ref={firstNameRef}
-                  required
-                  isInvalid={!!error.data && !!error.data.firstName}
-                  defaultValue={currentUser.firstName}
-                  placeholder="First Name" />
-                  <Form.Control.Feedback type="invalid" >
-                    {!!error.data && !!error.data.firstName && error.data.firstName}
-                  </Form.Control.Feedback>
-              </Form.Group>
-
-              <Form.Group as={Col} sm="12" md="4" id="lastName">
-                <Form.Label>Last Name</Form.Label>
-                <Form.Control 
-                  type="text" 
-                  ref={lastNameRef}
-                  required
-                  isInvalid={!!error.data && !!error.data.lastName}
-                  defaultValue={currentUser.lastName}
-                  placeholder="Last Name" />
-                  <Form.Control.Feedback type="invalid" >
-                    {!!error.data && !!error.data.lastName && error.data.lastName}
-                  </Form.Control.Feedback>
-              </Form.Group>
-            </Form.Row>
-
-            <Form.Row>
-              <Form.Group as={Col} sm="12" md="4" id="phoneNumber">
-                <Form.Label>Phone Number</Form.Label>
-                <InputGroup className="mb-3">
-                  <InputGroup.Prepend>
-                    <InputGroup.Text>+</InputGroup.Text>
-                  </InputGroup.Prepend>
-                  <Form.Control 
-                    className="col-3" 
-                    type="tel" 
-                    ref={contryCodeRef}
-                    required
-                    isInvalid={!!error.data && !!error.data.countryCode} 
-                    defaultValue={currentUser.countryCode}
-                    placeholder="Country Code" />
-                  <Form.Control 
-                    type="tel" 
-                    ref={phoneNumberRef}
-                    required
-                    isInvalid={!!error.data && !!error.data.phoneNumber}
-                    defaultValue={currentUser.phoneNumber}
-                    placeholder="Phone Number" />
-                  <Form.Control.Feedback type="invalid" >
-                    {!!error.data && !!error.data.countryCode && error.data.countryCode} &nbsp;
-                    {!!error.data && !!error.data.phoneNumber && error.data.phoneNumber}
-                  </Form.Control.Feedback>
-                </InputGroup>
-              </Form.Group>
-
-              <Form.Group as={Col} sm="12" md="4" id="email">
-                <Form.Label>Email</Form.Label>
-                <Form.Control 
-                  type="email" 
-                  ref={emailRef}
-                  required
-                  isInvalid={!!error.data && !!error.data.email}
-                  defaultValue={currentUser.email}
-                  placeholder="Email" />
-                  <Form.Control.Feedback type="invalid" >
-                    {!!error.data && !!error.data.email && error.data.email}
-                  </Form.Control.Feedback>
-              </Form.Group>
-
-              <Form.Group as={Col} sm="12" md="4" id="email">
-                <Form.Label>Address</Form.Label>
-                <Form.Control 
-                  type="text" 
-                  ref={addressRef}
-                  required
-                  isInvalid={!!error.data && !!error.data.address}
-                  defaultValue={currentUser.address} 
-                  placeholder="Address" />
-                  <Form.Control.Feedback type="invalid" >
-                    {!!error.data && !!error.data.address && error.data.address}
-                  </Form.Control.Feedback>
-              </Form.Group>
-            </Form.Row>
-
-            <Form.Row>
-              <Form.Group as={Col} sm="12" md="3" id="city">
-                <Form.Label>City</Form.Label>
-                <Form.Control 
-                  type="text" 
-                  ref={cityRef}
-                  required
-                  isInvalid={!!error.data && !!error.data.city}
-                  defaultValue={currentUser.city}
-                  placeholder="City" />
-                  <Form.Control.Feedback type="invalid" >
-                    {!!error.data && !!error.data.city && error.data.city}
-                  </Form.Control.Feedback>
-              </Form.Group>
-              <Form.Group as={Col} sm="12" md="3" id="state">
-                <Form.Label>State</Form.Label>
-                <Form.Control 
-                  type="text" 
-                  ref={stateRef}
-                  required
-                  isInvalid={!!error.data && !!error.data.state}
-                  defaultValue={currentUser.state}
-                  placeholder="State" />
-                  <Form.Control.Feedback type="invalid" >
-                    {!!error.data && !!error.data.state && error.data.state}
-                  </Form.Control.Feedback>
-              </Form.Group>
-              <Form.Group as={Col} sm="12" md="3" id="postalCode">
-                <Form.Label>Postal Code</Form.Label>
-                <Form.Control 
-                  type="text" 
-                  ref={postCodeRef}
-                  required
-                  isInvalid={!!error.data && !!error.data.postalCode}
-                  defaultValue={currentUser.postalCode}
-                  placeholder="Postal Code" />
-                  <Form.Control.Feedback type="invalid" >
-                    {!!error.data && !!error.data.postalCode && error.data.postalCode}
-                  </Form.Control.Feedback>
-              </Form.Group>
-              <Form.Group as={Col} sm="12" md="3" id="postalCode">
-                <Form.Label>Country</Form.Label>
-                <Form.Control 
-                  type="text" 
-                  ref={countryRef}
-                  required
-                  isInvalid={!!error.data && !!error.data.country}
-                  defaultValue={currentUser.country}
-                  placeholder="Postal Code" />
-                  <Form.Control.Feedback type="invalid" >
-                    {!!error.data && !!error.data.country && error.data.country}
-                  </Form.Control.Feedback>
-              </Form.Group>
-            </Form.Row>
-            <Button className="w-100" type="submit" disabled={loading}>
-              {loading ? <>
-                <Spinner
-                  as="span"
-                  animation="border"
-                  size="sm"
-                  role="status"
-                  aria-hidden="true"
+                  disabled
                 />
-                <span className="sr-only">Loading...</span>
+              </Grid>
+              <Grid item xs={12} sm={4}>
+                <TextField
+                  autoComplete="firstname"
+                  name="firstName"
+                  variant="outlined"
+                  fullWidth
+                  id="firstName"
+                  label="First Name"
+                  inputRef={firstNameRef}
+                  error={!!error.data && !!error.data.firstName }
+                  helperText={!!error.data && !!error.data.firstName && error.data.firstName}
+                  defaultValue={currentUser.firstName}
+                />
+              </Grid>
+              <Grid item xs={12} sm={4}>
+                <TextField
+                  autoComplete="lastname"
+                  variant="outlined"
+                  fullWidth
+                  id="lastName"
+                  label="Last Name"
+                  name="lastName"
+                  inputRef={lastNameRef}
+                  error={!!error.data && !!error.data.lastName }
+                  helperText={!!error.data && !!error.data.lastName && error.data.lastName}
+                  defaultValue={currentUser.lastName}
+                />
+              </Grid>
+              <Grid item xs={4} sm={2}>
+                <TextField
+                  autoComplete="countryCode"
+                  name="countryCode"
+                  variant="outlined"
+                  fullWidth
+                  id="countryCode"
+                  label="Country Code"
+                  inputRef={contryCodeRef}
+                  error={!!error.data && !!error.data.countryCode }
+                  helperText={!!error.data && !!error.data.countryCode && error.data.countryCode}
+                  InputProps={{
+                    startAdornment: <InputAdornment position="start">+</InputAdornment>,
+                  }}
+                  defaultValue={currentUser.countryCode}
+                />
+              </Grid>
+              <Grid item xs={8} sm={4}>
+                <TextField
+                  autoComplete="phoneNumber"
+                  variant="outlined"
+                  fullWidth
+                  id="phoneNumber"
+                  label="Phone Number"
+                  name="phoneNumber"
+                  inputRef={phoneNumberRef}
+                  error={!!error.data && !!error.data.phoneNumber }
+                  helperText={!!error.data && !!error.data.phoneNumber && error.data.phoneNumber}
+                  defaultValue={currentUser.phoneNumber}
+                />
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <TextField
+                  variant="outlined"
+                  fullWidth
+                  id="email"
+                  label="Email Address"
+                  name="email"
+                  autoComplete="email"
+                  inputRef={emailRef}
+                  error={!!error.data && !!error.data.email }
+                  helperText={!!error.data && !!error.data.email && error.data.email}
+                  defaultValue={currentUser.email}
+                />
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <TextField
+                  variant="outlined"
+                  fullWidth
+                  id="address"
+                  label="Address"
+                  name="address"
+                  autoComplete="address"
+                  inputRef={addressRef}
+                  error={!!error.data && !!error.data.address }
+                  helperText={!!error.data && !!error.data.address && error.data.address}
+                  defaultValue={currentUser.address}
+                />
+              </Grid>
+              <Grid item xs={12} sm={3}>
+                <TextField
+                  variant="outlined"
+                  fullWidth
+                  id="city"
+                  label="City"
+                  name="city"
+                  autoComplete="city"
+                  inputRef={cityRef}
+                  error={!!error.data && !!error.data.city }
+                  helperText={!!error.data && !!error.data.city && error.data.city}
+                  defaultValue={currentUser.city}
+                />
+              </Grid>
+              <Grid item xs={12} sm={3}>
+                <TextField
+                  variant="outlined"
+                  fullWidth
+                  id="state"
+                  label="State"
+                  name="state"
+                  autoComplete="state"
+                  inputRef={stateRef}
+                  error={!!error.data && !!error.data.state }
+                  helperText={!!error.data && !!error.data.state && error.data.state}
+                  defaultValue={currentUser.state}
+                />
+              </Grid>
+              <Grid item xs={12} sm={3}>
+                <TextField
+                  variant="outlined"
+                  fullWidth
+                  id="postCode"
+                  label="Post Code"
+                  name="postCode"
+                  autoComplete="postCode"
+                  inputRef={postCodeRef}
+                  error={!!error.data && !!error.data.postalCode }
+                  helperText={!!error.data && !!error.data.postalCode && error.data.postalCode}
+                  defaultValue={currentUser.postalCode}
+                />
+              </Grid>
+              <Grid item xs={12} sm={3}>
+                <TextField
+                  variant="outlined"
+                  fullWidth
+                  id="country"
+                  label="Country"
+                  name="country"
+                  autoComplete="country"
+                  inputRef={countryRef}
+                  error={!!error.data && !!error.data.country }
+                  helperText={!!error.data && !!error.data.country && error.data.country}
+                  defaultValue={currentUser.country}
+                />
+              </Grid>
+            </Grid>
+            <Button
+              type="submit"
+              fullWidth
+              variant="contained"
+              color="primary"
+              className={classes.submit}
+              size="large"
+            >
+              {loading ? <>
+                <CircularProgress size={24} />
               </>
               :
               <>
                 Update
-              </>
-            }
+              </>}
             </Button>
-          </Form>
+          </form>
         </>
 
         :
 
         <>
-          <Card>
-            <Card.Body>
-              <Card.Title>{currentUser.firstName} {currentUser.lastName}</Card.Title>
-              <Card.Subtitle className="mb-2 text-muted">{currentUser.email}</Card.Subtitle>
-              <Card.Subtitle className="mb-2 text-muted">{currentUser.company.name}</Card.Subtitle>
-              <Card.Subtitle className="mb-2 text-muted">{currentUser.roles[0].name}</Card.Subtitle>
-              <ListGroup variant="flush">
-                <ListGroup.Item>
-                  <strong>Contact:</strong> <br/>
-                  +{currentUser.countryCode} {currentUser.phoneNumber}
-                </ListGroup.Item>
-                <ListGroup.Item>
-                  <strong>Address:</strong> <br/>
-                  {currentUser.address} <br/>
-                  {currentUser.city} <br/>
-                  {currentUser.state} <br/>
-                  {currentUser.postalCode} <br/>
-                  {currentUser.country} <br/>
-                </ListGroup.Item>
-                <ListGroup.Item>
-                  <strong>Last password changed At:</strong> <br/>
-                  {currentUser.passwordChangedAt}
-                </ListGroup.Item>
-                <ListGroup.Item>
-                  <strong>Last updated At:</strong> <br/>
-                  {currentUser.updateAt}
-                </ListGroup.Item>
-              </ListGroup>
-              <Card.Text>
-                Please ask the Admin to update any of the following details.
-              </Card.Text>
-            </Card.Body>
+          <Card className={classes.detailsCard}>
+            <CardHeader
+              avatar={
+                <Avatar aria-label="recipe" className={classes.avatar}>
+                  {currentUser.firstName.charAt(0)}{currentUser.lastName.charAt(0)}
+                </Avatar>
+              }
+              title={
+                <Typography variant="h5" color="textPrimary" component="h5">
+                  {currentUser.firstName} {currentUser.lastName}
+                </Typography>
+              }
+              subheader={
+                <>
+                  <Typography variant="body1" color="textSecondary" component="p">
+                    {currentUser.company.name}
+                  </Typography>
+                  <Typography variant="body2" color="textSecondary" component="p">
+                    {currentUser.email}
+                  </Typography>
+                </>
+              }
+            />
+            <Divider />
+            <CardContent>
+              <List>
+                <ListItem>
+                  <ListItemText
+                    primary="Role"
+                    secondary={currentUser.roles[0].name}
+                  />
+                </ListItem>
+                <ListItem>
+                  <ListItemText
+                    primary="Address"
+                    secondary={
+                      <Typography variant="body2" color="textSecondary" component="p">
+                        {currentUser.address} <br/>
+                        {currentUser.city} <br/>
+                        {currentUser.state} <br/>
+                        {currentUser.postalCode} <br/>
+                        {currentUser.country} <br/>
+                      </Typography>
+                    }
+                  />
+                </ListItem>
+                <ListItem>
+                  <ListItemText
+                    primary="Last password changed At:"
+                    secondary={currentUser.passwordChangedAt ? currentUser.passwordChangedAt : 'N/A'}
+                  />
+                </ListItem>
+                <ListItem>
+                  <ListItemText
+                    primary="Last updated At:"
+                    secondary={currentUser.updateAt}
+                  />
+                </ListItem>
+              </List>
+              <Typography variant="body2" color="textPrimary" component="p">
+                <strong>Please ask the Admin/Manager to update any of the following details.</strong>
+              </Typography>
+            </CardContent>
           </Card>
         </>
       }

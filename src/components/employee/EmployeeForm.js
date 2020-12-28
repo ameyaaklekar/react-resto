@@ -1,12 +1,53 @@
 import React, { useEffect, useRef, useState } from 'react'
-import { Container, Row, Col, Alert, Button, Form, InputGroup, Spinner } from 'react-bootstrap';
+
 import { useEmployee } from '../../context/EmployeeContext';
 import PermissionsForm from './PermissionsForm';
 import { modalView } from '../preference/Users';
+import Alert from '@material-ui/lab/Alert';
+import Grid from '@material-ui/core/Grid';
+import TextField from '@material-ui/core/TextField';
+import Button from '@material-ui/core/Button';
+import { makeStyles } from '@material-ui/core/styles';
+import { CircularProgress, Divider, InputAdornment, Typography, FormControl, InputLabel, Select, MenuItem, FormControlLabel, Checkbox, FormHelperText } from '@material-ui/core';
+
+const useStyles = makeStyles((theme) => ({
+  paper: {
+    marginTop: theme.spacing(8),
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+  },
+  avatar: {
+    margin: theme.spacing(1),
+    backgroundColor: theme.palette.secondary.main,
+    width: theme.spacing(8),
+    height: theme.spacing(8),
+  },
+  form: {
+    width: '100%', // Fix IE 11 issue.
+    marginTop: theme.spacing(3),
+  },
+  submit: {
+    margin: theme.spacing(3, 0, 2),
+  },
+  alert: {
+    margin: theme.spacing(1),
+    width: '100%',
+  },
+  detailsCard: {
+    minWidth: 275,
+    maxWidth: 500,
+  },
+  secondaryHeading: {
+    marginBottom: theme.spacing(2),
+  },
+  formControl: {
+    minWidth: '100%',
+  },
+}));
 
 export default function EmployeeForm({ employee, mode }) {
   const formRef = useRef()
-  const roleRef = useRef()
   
   const defaults = {
     message: "",
@@ -90,9 +131,8 @@ export default function EmployeeForm({ employee, mode }) {
     setLoading(false)
   }
 
-  async function handleOnRoleChange(e) {
-    const role = roleRef.current.value
-
+  async function handleOnRoleChange(event) {
+    const role = event.target.value
     if (role) {
       const response = await getRolePermission(role)
   
@@ -108,7 +148,7 @@ export default function EmployeeForm({ employee, mode }) {
 		&& roles.map((role) => {
     let selected = (employee && employee.roles && employee.roles[0].codeName === role.codeName)
 		return (
-			<option key={role.id} value={role.codeName} selected={selected}>{role.name}</option>
+			<MenuItem key={role.id} value={role.codeName} selected={selected}>{role.name}</MenuItem>
 		)
 	}, this);
 
@@ -124,228 +164,207 @@ export default function EmployeeForm({ employee, mode }) {
     })
   }, [])
 
+  const classes = useStyles();
+
   return (
-    <Container>
+    <>
       {error.show && 
-        <Row>
-          <Col>
-            <Alert variant="danger">{error.message}</Alert>
-          </Col>
-        </Row>
+        <Alert className={classes.alert} severity="error">{error.message}</Alert>
       }
-
       {success.show && 
-        <Row>
-          <Col>
-            <Alert variant="success">{success.message}</Alert>
-          </Col>
-        </Row>
+        <Alert className={classes.alert} severity="success">{success.message}</Alert>
       }
-      <Form onSubmit={handleSubmit} ref={formRef}>
-        <Row>
-          <Col md="4">
-            <Form.Group id="firstName">
-              <Form.Label>First Name</Form.Label>
-              <Form.Control 
-                type="text"
-                name="firstName"
-                defaultValue={employee.firstName}
-                required
-                isInvalid={!!error.data && !!error.data.firstName} />
-                <Form.Control.Feedback type="invalid" >
-                  {!!error.data && !!error.data.firstName && error.data.firstName}
-                </Form.Control.Feedback>
-            </Form.Group>
-          </Col>
-          <Col md="4">
-            <Form.Group id="lastName">
-              <Form.Label>Last Name</Form.Label>
-              <Form.Control 
-                type="text" 
-                name="lastName"
-                defaultValue={employee.lastName}
-                required
-                isInvalid={!!error.data && !!error.data.lastName} />
-                <Form.Control.Feedback type="invalid" >
-                  {!!error.data && !!error.data.lastName && error.data.lastName}
-                </Form.Control.Feedback>
-            </Form.Group>
-          </Col>
-          <Col md="4">
-            <Form.Group id="phoneNumber">
-              <Form.Label>Phone Number</Form.Label>
-              <InputGroup className="mb-3">
-                <InputGroup.Prepend>
-                  <InputGroup.Text>+</InputGroup.Text>
-                </InputGroup.Prepend>
-                <Form.Control 
-                  className="col-3" 
-                  type="tel" 
-                  name="countryCode"
-                  defaultValue={employee.countryCode}
-                  required
-                  isInvalid={!!error.data && !!error.data.countryCode} />
-                <Form.Control 
-                  type="tel" 
-                  name="phoneNumber"
-                  required
-                  defaultValue={employee.phoneNumber}
-                  isInvalid={!!error.data && !!error.data.phoneNumber} />
-                <Form.Control.Feedback type="invalid" >
-                  {!!error.data && !!error.data.countryCode && error.data.countryCode} &nbsp;
-                  {!!error.data && !!error.data.phoneNumber && error.data.phoneNumber}
-                </Form.Control.Feedback>
-              </InputGroup>
-            </Form.Group>
-          </Col>
-        </Row>
-
-        <Row>
-          <Col md="4">
-            <Form.Group id="email">
-              <Form.Label>Email</Form.Label>
-              <Form.Control 
-                type="email" 
-                name="email"
-                defaultValue={employee.email}
-                required
-                isInvalid={!!error.data && !!error.data.email} />
-                <Form.Control.Feedback type="invalid" >
-                  {!!error.data && !!error.data.email && error.data.email}
-                </Form.Control.Feedback>
-            </Form.Group>
-          </Col>
-         <Col md="4">
-            <Form.Group id="address">
-              <Form.Label>Address</Form.Label>
-              <Form.Control 
-                type="text" 
-                name="address"
-                defaultValue={employee.address}
-                isInvalid={!!error.data && !!error.data.address} />
-                <Form.Control.Feedback type="invalid" >
-                  {!!error.data && !!error.data.address && error.data.address}
-                </Form.Control.Feedback>
-            </Form.Group>
-          </Col>
-          <Col md="4">
-            <Form.Group id="city">
-              <Form.Label>City</Form.Label>
-              <Form.Control 
-                type="text" 
-                name="city"
-                defaultValue={employee.city}
-                isInvalid={!!error.data && !!error.data.city} />
-                <Form.Control.Feedback type="invalid" >
-                  {!!error.data && !!error.data.city && error.data.city}
-                </Form.Control.Feedback>
-            </Form.Group>
-          </Col>
-        </Row>
-
-        <Row>
-          <Col md="4">
-            <Form.Group id="state">
-              <Form.Label>State</Form.Label>
-              <Form.Control 
-                type="text" 
-                name="state"
-                defaultValue={employee.state}
-                isInvalid={!!error.data && !!error.data.state} />
-                <Form.Control.Feedback type="invalid" >
-                  {!!error.data && !!error.data.state && error.data.state}
-                </Form.Control.Feedback>
-            </Form.Group>
-          </Col>
-          <Col md="4">
-            <Form.Group id="postalCode">
-              <Form.Label>Post Code</Form.Label>
-              <Form.Control 
-                type="text" 
-                name="postalCode"
-                defaultValue={employee.postalCode}
-                isInvalid={!!error.data && !!error.data.postalCode} />
-                <Form.Control.Feedback type="invalid" >
-                  {!!error.data && !!error.data.postalCode && error.data.postalCode}
-                </Form.Control.Feedback>
-            </Form.Group>
-          </Col>
-          <Col md="4">
-            <Form.Group id="country">
-              <Form.Label>Country</Form.Label>
-              <Form.Control 
-                type="text" 
-                name="country"
-                defaultValue={employee.country}
-                isInvalid={!!error.data && !!error.data.country} />
-                <Form.Control.Feedback type="invalid" >
-                  {!!error.data && !!error.data.country && error.data.country}
-                </Form.Control.Feedback>
-            </Form.Group>
-          </Col>
-        </Row>
-
-        <Row>
-          <Col>
-            <hr/>
-          </Col>
-        </Row>
-
-        <Row>
-          <Col md="4">
-            <h5>Roles</h5>
-            <Form.Group id="roles">
-              <Form.Control as="select" defaultValue="test"
-                ref={roleRef}
-                name="role"
+      <form className={classes.form} onSubmit={handleSubmit} ref={formRef}>
+        <Grid container spacing={2}>
+          <Grid item xs={12} md={6}>
+            <TextField
+              autoComplete="firstname"
+              name="firstName"
+              variant="outlined"
+              fullWidth
+              id="firstName"
+              label="First Name"
+              error={!!error.data && !!error.data.firstName }
+              helperText={!!error.data && !!error.data.firstName && error.data.firstName}
+              defaultValue={employee.firstName}
+            />
+          </Grid>
+          <Grid item xs={12} md={6}>
+            <TextField
+              autoComplete="lastname"
+              variant="outlined"
+              fullWidth
+              id="lastName"
+              label="Last Name"
+              name="lastName"
+              error={!!error.data && !!error.data.lastName }
+              helperText={!!error.data && !!error.data.lastName && error.data.lastName}
+              defaultValue={employee.lastName}
+            />
+          </Grid>
+          <Grid item xs={4} md={2}>
+            <TextField
+              autoComplete="countryCode"
+              name="countryCode"
+              variant="outlined"
+              fullWidth
+              id="countryCode"
+              label="Country Code"
+              error={!!error.data && !!error.data.countryCode }
+              helperText={!!error.data && !!error.data.countryCode && error.data.countryCode}
+              InputProps={{
+                startAdornment: <InputAdornment position="start">+</InputAdornment>,
+              }}
+              defaultValue={employee.countryCode}
+            />
+          </Grid>
+          <Grid item xs={8} md={4}>
+            <TextField
+              autoComplete="phoneNumber"
+              variant="outlined"
+              fullWidth
+              id="phoneNumber"
+              label="Phone Number"
+              name="phoneNumber"
+              error={!!error.data && !!error.data.phoneNumber }
+              helperText={!!error.data && !!error.data.phoneNumber && error.data.phoneNumber}
+              defaultValue={employee.phoneNumber}
+            />
+          </Grid>
+          <Grid item xs={12} md={6}>
+            <TextField
+              variant="outlined"
+              fullWidth
+              id="email"
+              label="Email Address"
+              name="email"
+              autoComplete="email"
+              error={!!error.data && !!error.data.email }
+              helperText={!!error.data && !!error.data.email && error.data.email}
+              defaultValue={employee.email}
+            />
+          </Grid>
+          <Grid item xs={12}>
+            <TextField
+              variant="outlined"
+              fullWidth
+              id="address"
+              label="Address"
+              name="address"
+              autoComplete="address"
+              error={!!error.data && !!error.data.address }
+              helperText={!!error.data && !!error.data.address && error.data.address}
+              defaultValue={employee.address}
+            />
+          </Grid>
+          <Grid item xs={12} md={3}>
+            <TextField
+              variant="outlined"
+              fullWidth
+              id="city"
+              label="City"
+              name="city"
+              autoComplete="city"
+              error={!!error.data && !!error.data.city }
+              helperText={!!error.data && !!error.data.city && error.data.city}
+              defaultValue={employee.city}
+            />
+          </Grid>
+          <Grid item xs={12} md={3}>
+            <TextField
+              variant="outlined"
+              fullWidth
+              id="state"
+              label="State"
+              name="state"
+              autoComplete="state"
+              error={!!error.data && !!error.data.state }
+              helperText={!!error.data && !!error.data.state && error.data.state}
+              defaultValue={employee.state}
+            />
+          </Grid>
+          <Grid item xs={12} md={3}>
+            <TextField
+              variant="outlined"
+              fullWidth
+              id="postalCode"
+              label="Post Code"
+              name="postalCode"
+              autoComplete="postalCode"
+              error={!!error.data && !!error.data.postalCode }
+              helperText={!!error.data && !!error.data.postalCode && error.data.postalCode}
+              defaultValue={employee.postalCode}
+            />
+          </Grid>
+          <Grid item xs={12} md={3}>
+            <TextField
+              variant="outlined"
+              fullWidth
+              id="country"
+              label="Country"
+              name="country"
+              autoComplete="country"
+              error={!!error.data && !!error.data.country }
+              helperText={!!error.data && !!error.data.country && error.data.country}
+              defaultValue={employee.country}
+            />
+          </Grid>
+        </Grid>
+        <hr />
+        <Grid container spacing={2}>
+          <Grid item xs={12} md={4}>
+            <Typography variant="h6" color="textPrimary" component="h6" className={classes.secondaryHeading}>
+              Roles
+            </Typography>
+            <FormControl variant="outlined" className={classes.formControl}
+              error={!!error.data && !!error.data.role }
+              >
+              <InputLabel id="demo-simple-select-outlined-label">Role</InputLabel>
+              <Select
+                labelId="demo-simple-select-outlined-label"
+                id="demo-simple-select-outlined"
+                defaultValue={employee.roles && employee.roles[0].codeName}
                 onChange={handleOnRoleChange}
-                custom>
-                  <option value="" key="default">Select a role</option>
-                  {rolesOptions}
-              </Form.Control>
-            </Form.Group>
-          </Col>
-          {permissions.length > 0 &&
-          <Col md="8">
-            <h5>Permissions</h5>
-            <Row>
+                label="Role"
+                name="role"
+              >
+                <MenuItem value="">
+                  <em>None</em>
+                </MenuItem>
+                {rolesOptions}
+              </Select>
+              <FormHelperText>{!!error.data && !!error.data.role && error.data.role}</FormHelperText>
+            </FormControl>
+          </Grid>
+          <Grid item xs={12} md={8}>
+            <Typography variant="h6" color="textPrimary" component="h6" className={classes.secondaryHeading}>
+              Permissions
+            </Typography>
+            <Grid container spacing={2}>
               <PermissionsForm 
-                employeePermissions={employeePermissions}
                 permissions={permissions}
+                employeePermissions={employeePermissions}
               />
-            </Row>
-          </Col>
-          }
-          
-        </Row>
-
-        <Row>
-          <Col>
-            <hr/>
-          </Col>
-        </Row>
-
-        <Row>
-          <Col>
-            <Button type="submit" disabled={loading} block>
-              {loading ? <>
-                <Spinner
-                  as="span"
-                  animation="border"
-                  size="sm"
-                  role="status"
-                  aria-hidden="true"
-                />
-                <span className="sr-only">Loading...</span>
-              </>
-              :
-              <>
-                Save
-              </>}
-            </Button>
-          </Col>
-        </Row>
-      </Form>
-    </Container>
+            </Grid>
+          </Grid>
+        </Grid>
+        <Button
+          type="submit"
+          fullWidth
+          variant="contained"
+          color="primary"
+          className={classes.submit}
+          size="large"
+        >
+          {loading ? <>
+            <CircularProgress size={24} />
+          </>
+          :
+          <>
+            Update
+          </>}
+        </Button>
+      </form>
+    </>
   )
 }

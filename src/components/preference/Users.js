@@ -1,8 +1,15 @@
 import React, { useState } from 'react'
-import { Table, Button, Form } from 'react-bootstrap';
 import { useEmployee } from '../../context/EmployeeContext';
 import { useAuth } from '../../context/AuthContext';
 import EmployeeModal from '../modal/EmployeeModal';
+
+import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Collapse, Box, List, ListItem, ListItemText, Switch, Button } from '@material-ui/core';
+import { makeStyles } from '@material-ui/core/styles';
+import KeyboardArrowDownIcon from '@material-ui/icons/KeyboardArrowDown';
+import KeyboardArrowUpIcon from '@material-ui/icons/KeyboardArrowUp';
+import IconButton from '@material-ui/core/IconButton';
+import Grid from '@material-ui/core/Grid';
+import Typography from '@material-ui/core/Typography';
 
 export const modalView = {
   MODE_EDIT: "edit",
@@ -11,11 +18,28 @@ export const modalView = {
 
 export default function Users() {
 
+  const useStyles = makeStyles((theme) => ({
+    table: {
+      width: '100%'
+    },
+    tableRow: {
+      '& > *': {
+        borderBottom: 'unset',
+      },
+    },
+    createEmployeeBtn: {
+      marginBottom: theme.spacing(2)
+    }
+  }));
+
+  const classes = useStyles();
+
   const { currentUser } = useAuth()
   const { employees, updateStatus, getEmployee, getEmployees } = useEmployee()
   const [modalShow, setModalShow] = useState(false);
   const [employeeToEdit, setEmployeeToEdit] = useState([])
   const [mode, setMode] = useState(modalView.MODE_NEW)
+  const [open, setOpen] = useState(false);
 
   async function updateEmployeeStatus(employeeId, status) {
     let data = []
@@ -56,50 +80,123 @@ export default function Users() {
     setModalShow(false)
   }
 
+  async function handleDetails(id) {
+    if (open === id) {
+      setOpen(false)
+    } else {
+      setOpen(id)
+    }
+  }
+
   return (
     <>
-      <Button variant="outline-primary" onClick={createEmployee}>Create New Employee</Button>
-      <hr/>
-      <Table responsive>
-        <thead>
-          <tr>
-            <th>#</th>
-            <th>Name</th>
-            <th>Email</th>
-            <th>Contact</th>
-            <th>Status</th>
-            <th></th>
-          </tr>
-        </thead>
-        <tbody>
+      <Button 
+        variant="outlined" 
+        size="medium" 
+        color="primary" 
+        onClick={createEmployee}
+        className={classes.createEmployeeBtn}>
+        Create New Employee
+      </Button>
+      <TableContainer component={Paper}>
+        <Table aria-label="collapsible table" className={classes.table}>
+          <TableHead>
+            <TableRow>
+              <TableCell />
+              <TableCell>#</TableCell>
+              <TableCell align="left">Name</TableCell>
+              <TableCell align="left">Email</TableCell>
+              <TableCell align="left">Contact</TableCell>
+              <TableCell align="left">Status</TableCell>
+              <TableCell />
+            </TableRow>
+          </TableHead>
+          <TableBody>
           {employees.map((employee, index) => (
-              <tr key={employee.id}>
-                <td>{index + 1}</td>
-                <td>{employee.firstName} {employee.lastName}</td>
-                <td>{employee.email}</td>
-                <td>+{employee.countryCode} {employee.phoneNumber}</td>
-                <td>
-                  <Form.Check 
-                    type="switch"
-                    id={employee.id}
-                    label=""
-                    defaultChecked = {employee.status === 'A'}
+            <>
+              <TableRow className={classes.tableRow} key={employee.id}>
+                <TableCell>
+                  <IconButton aria-label="expand row" size="small" onClick={() => handleDetails(employee.id)}>
+                    {open === employee.id ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
+                  </IconButton>
+                </TableCell>
+                <TableCell component="th" scope="row">
+                  {index + 1}
+                </TableCell>
+                <TableCell align="left">{employee.firstName} {employee.lastName}</TableCell>
+                <TableCell align="left">{employee.email}</TableCell>
+                <TableCell align="left">+{employee.countryCode} {employee.phoneNumber}</TableCell>
+                <TableCell align="left">
+                  <Switch
+                    defaultChecked={employee.status === 'A'}
                     onChange={(e) => updateEmployeeStatus(employee.id, e.target.checked)}
-                  />               
-                </td>
-                <td>
-                  <Button variant="primary" onClick={() => editEmployee(employee.id)}>
+                    color="primary"
+                    name="checkedB"
+                    id={employee.id}
+                    inputProps={{ 'aria-label': 'primary checkbox' }}
+                    disabled={currentUser.id === employee.id}
+                  />
+                </TableCell>
+                <TableCell>
+                  <Button 
+                    variant="contained" 
+                    size="medium" 
+                    color="primary" 
+                    onClick={() => editEmployee(employee.id)}>
                     Edit
                   </Button>
-                </td>
-              </tr>
-            ))
-          }
-        </tbody>
-      </Table>
+                </TableCell>
+              </TableRow>
+              <TableRow>
+                <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={6}>
+                  <Collapse in={open === employee.id} timeout="auto" unmountOnExit>
+                    <Box margin={1}>
+                    <List>
+                      <ListItem key={`'name'-${employee.id}`}>
+                        <ListItemText
+                          primary="Role"
+                          secondary={employee.roles[0].name}
+                        />
+                      </ListItem>
+                      <ListItem key={`'address'-${employee.id}`}>
+                        <ListItemText
+                          primary="Address"
+                          secondary={
+                            <Typography variant="body2" color="textSecondary" component="p">
+                              {employee.address} <br/>
+                              {employee.city} <br/>
+                              {employee.state} <br/>
+                              {employee.postalCode} <br/>
+                              {employee.country} <br/>
+                            </Typography>
+                          }
+                        />
+                      </ListItem>
+                      <ListItem key={`'password-change'-${employee.id}`}>
+                        <ListItemText
+                          primary="Last password changed At:"
+                          secondary={employee.passwordChangedAt ? employee.passwordChangedAt : 'N/A'}
+                        />
+                      </ListItem>
+                      <ListItem key={`'updated-at'-${employee.id}`}>
+                        <ListItemText
+                          primary="Last updated At:"
+                          secondary={employee.updateAt}
+                        />
+                      </ListItem>
+                    </List>
+                    </Box>
+                  </Collapse>
+                </TableCell>
+              </TableRow>
+            </>
+          ))}
+          </TableBody>
+        </Table>
+      </TableContainer>
       <EmployeeModal 
-        show={modalShow}
-        onHide={onHide}
+        open={modalShow}
+        onClose={onHide}
         employee={employeeToEdit}
         mode={mode}
         title={mode === modalView.MODE_EDIT ? "Edit Employee" : "Create Employee"}

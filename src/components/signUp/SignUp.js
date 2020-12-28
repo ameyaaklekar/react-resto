@@ -1,8 +1,19 @@
 import React, { useRef, useState } from 'react'
-import { Alert, Button, Container, Card, Form, InputGroup, Spinner } from 'react-bootstrap'
 import ReCAPTCHA from 'react-google-recaptcha';
 import { Link, useHistory } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
+
+import Grid from '@material-ui/core/Grid';
+import LockOutlinedIcon from '@material-ui/icons/LockOutlined';
+import Typography from '@material-ui/core/Typography';
+import { makeStyles } from '@material-ui/core/styles';
+import Container from '@material-ui/core/Container';
+import { CircularProgress, InputAdornment } from '@material-ui/core';
+import Alert from '@material-ui/lab/Alert';
+import Avatar from '@material-ui/core/Avatar';
+import Button from '@material-ui/core/Button';
+import CssBaseline from '@material-ui/core/CssBaseline';
+import TextField from '@material-ui/core/TextField';
 
 export default function SignUp() {
   const companyNameRef = useRef()
@@ -72,137 +83,183 @@ export default function SignUp() {
     captchaRef.current.value = value
   }
 
+  const useStyles = makeStyles((theme) => ({
+    paper: {
+      marginTop: theme.spacing(8),
+      display: 'flex',
+      flexDirection: 'column',
+      alignItems: 'center',
+    },
+    avatar: {
+      margin: theme.spacing(1),
+      backgroundColor: theme.palette.secondary.main,
+    },
+    form: {
+      width: '100%', // Fix IE 11 issue.
+      marginTop: theme.spacing(3),
+    },
+    submit: {
+      margin: theme.spacing(3, 0, 2),
+    },
+    alert: {
+      margin: theme.spacing(1),
+      width: '100%',
+    }
+  }));
+
+  const classes = useStyles();
+
   return (
-    <Container className="d-flex align-items-center justify-content-center"
-      style={{ minHeight: "100vh" }}>
-      <div className="w-100" style={{ maxWidth: "500px" }}>
-      {error.show && 
-        <Alert variant="danger">{error.message}</Alert>
-      }
-        <Card>
-          <Card.Body>
-            <h2 className="text-center mb-4">Sign Up</h2>
-            <Form onSubmit={handleSubmit}>
-              <Form.Group id="companyName">
-                <Form.Label>Company Name</Form.Label>
-                <Form.Control 
-                  type="text" 
-                  ref={companyNameRef}
-                  required
-                  isInvalid={!!error.data && !!error.data.company } />
-                  <Form.Control.Feedback type="invalid" >
-                    {!!error.data && !!error.data.company && error.data.company}
-                  </Form.Control.Feedback>
-              </Form.Group>
 
-              <Form.Group id="firstName">
-                <Form.Label>First Name</Form.Label>
-                <Form.Control 
-                  type="text" 
-                  ref={firstNameRef}
-                  required
-                  isInvalid={!!error.data && !!error.data.firstName} />
-                  <Form.Control.Feedback type="invalid" >
-                    {!!error.data && !!error.data.firstName && error.data.firstName}
-                  </Form.Control.Feedback>
-              </Form.Group>
-
-              <Form.Group id="lastName">
-                <Form.Label>Last Name</Form.Label>
-                <Form.Control 
-                  type="text" 
-                  ref={lastNameRef}
-                  required
-                  isInvalid={!!error.data && !!error.data.lastName} />
-                  <Form.Control.Feedback type="invalid" >
-                    {!!error.data && !!error.data.lastName && error.data.lastName}
-                  </Form.Control.Feedback>
-              </Form.Group>
-
-              <Form.Group id="phoneNumber">
-                <Form.Label>Phone Number</Form.Label>
-                <InputGroup className="mb-3">
-                  <InputGroup.Prepend>
-                    <InputGroup.Text>+</InputGroup.Text>
-                  </InputGroup.Prepend>
-                  <Form.Control 
-                    className="col-3" 
-                    type="tel" 
-                    ref={contryCodeRef}
-                    required
-                    isInvalid={!!error.data && !!error.data.countryCode} />
-                  <Form.Control 
-                    type="tel" 
-                    ref={phoneNumberRef}
-                    required
-                    isInvalid={!!error.data && !!error.data.phoneNumber} />
-                  <Form.Control.Feedback type="invalid" >
-                    {!!error.data && !!error.data.countryCode && error.data.countryCode} &nbsp;
-                    {!!error.data && !!error.data.phoneNumber && error.data.phoneNumber}
-                  </Form.Control.Feedback>
-                </InputGroup>
-              </Form.Group>
-
-              <Form.Group id="email">
-                <Form.Label>Email</Form.Label>
-                <Form.Control 
-                  type="email" 
-                  ref={emailRef}
-                  required
-                  isInvalid={!!error.data && !!error.data.email} />
-                  <Form.Control.Feedback type="invalid" >
-                    {!!error.data && !!error.data.email && error.data.email}
-                  </Form.Control.Feedback>
-              </Form.Group>
-
-              <Form.Group id="password">
-                <Form.Label>Password</Form.Label>
-                <Form.Control 
-                  type="password" 
-                  ref={passowrdRef}
-                  required
-                  isInvalid={!!error.data && !!error.data.password} />
-                  <Form.Control.Feedback type="invalid" >
-                    {!!error.data && !!error.data.password && error.data.password}
-                  </Form.Control.Feedback>
-              </Form.Group>
-
-              <Form.Group id="confirmPassword">
-                <Form.Label>Confirm Password</Form.Label>
-                <Form.Control 
-                  type="password" 
-                  ref={confirmPassowrdRef}
-                  required
-                  isInvalid={!!error.data && !!error.data.confirmPassword} />
-                <Form.Control.Feedback type="invalid" >
-                    {!!error.data && !!error.data.confirmPassword && error.data.confirmPassword}
-                  </Form.Control.Feedback>
-              </Form.Group>
-              <Form.Group id="recaptcha">
-                <ReCAPTCHA sitekey="6LfreLQZAAAAAI7rloxhlVtP5j3fN_vKaP76ymSQ" ref={captchaRef} onChange={verify} />
-              </Form.Group>
-              <Button className="w-100" type="submit" disabled={loading}>
-                {loading ? <>
-                  <Spinner
-                    as="span"
-                    animation="border"
-                    size="sm"
-                    role="status"
-                    aria-hidden="true"
-                  />
-                  <span className="sr-only">Loading...</span>
-                </>
-                :
-                <>
-                  Sign Up
-                </>}
-              </Button>
-            </Form>
-          </Card.Body>
-        </Card>
-        <div className="w-100 text-center mt-2">
-          Already have an account? <Link to="/login">Login</Link>
-        </div>
+    <Container component="main" maxWidth="xs">
+      <CssBaseline />
+      <div className={classes.paper}>
+        <Avatar className={classes.avatar}>
+          <LockOutlinedIcon />
+        </Avatar>
+        <Typography component="h1" variant="h5">
+          Sign up
+        </Typography>
+        {error.show && 
+          <Alert className={classes.alert} severity="error">{error.message}</Alert>
+        }
+        <form className={classes.form} onSubmit={handleSubmit}>
+          <Grid container spacing={2}>
+            <Grid item xs={12}>
+              <TextField
+                variant="outlined"
+                fullWidth
+                id="company"
+                label="Company"
+                name="company"
+                autoFocus
+                inputRef={companyNameRef}
+                error={!!error.data && !!error.data.company }
+                helperText={!!error.data && !!error.data.company && error.data.company}
+              />
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <TextField
+                autoComplete="firstname"
+                name="firstName"
+                variant="outlined"
+                fullWidth
+                id="firstName"
+                label="First Name"
+                inputRef={firstNameRef}
+                error={!!error.data && !!error.data.firstName }
+                helperText={!!error.data && !!error.data.firstName && error.data.firstName}
+              />
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <TextField
+                autoComplete="lastname"
+                variant="outlined"
+                fullWidth
+                id="lastName"
+                label="Last Name"
+                name="lastName"
+                inputRef={lastNameRef}
+                error={!!error.data && !!error.data.lastName }
+                helperText={!!error.data && !!error.data.lastName && error.data.lastName}
+              />
+            </Grid>
+            <Grid item xs={5}>
+              <TextField
+                autoComplete="countryCode"
+                name="countryCode"
+                variant="outlined"
+                fullWidth
+                id="countryCode"
+                label="Country Code"
+                inputRef={contryCodeRef}
+                error={!!error.data && !!error.data.countryCode }
+                helperText={!!error.data && !!error.data.countryCode && error.data.countryCode}
+                InputProps={{
+                  startAdornment: <InputAdornment position="start">+</InputAdornment>,
+                }}
+              />
+            </Grid>
+            <Grid item xs={7}>
+              <TextField
+                autoComplete="phoneNumber"
+                variant="outlined"
+                fullWidth
+                id="phoneNumber"
+                label="Phone Number"
+                name="phoneNumber"
+                inputRef={phoneNumberRef}
+                error={!!error.data && !!error.data.phoneNumber }
+                helperText={!!error.data && !!error.data.phoneNumber && error.data.phoneNumber}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <TextField
+                variant="outlined"
+                fullWidth
+                id="email"
+                label="Email Address"
+                name="email"
+                autoComplete="email"
+                inputRef={emailRef}
+                error={!!error.data && !!error.data.email }
+                helperText={!!error.data && !!error.data.email && error.data.email}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <TextField
+                variant="outlined"
+                fullWidth
+                name="password"
+                label="Password"
+                type="password"
+                id="password"
+                autoComplete="current-password"
+                inputRef={passowrdRef}
+                error={!!error.data && !!error.data.password }
+                helperText={!!error.data && !!error.data.password && error.data.password}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <TextField
+                variant="outlined"
+                fullWidth
+                name="confirmPassword"
+                label="Confirm Password"
+                type="password"
+                id="confirmPassword"
+                autoComplete="current-password"
+                inputRef={confirmPassowrdRef}
+                error={!!error.data && !!error.data.confirmPassword }
+                helperText={!!error.data && !!error.data.confirmPassword && error.data.confirmPassword}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <ReCAPTCHA sitekey="6LfreLQZAAAAAI7rloxhlVtP5j3fN_vKaP76ymSQ" ref={captchaRef} onChange={verify} />
+            </Grid>
+          </Grid>
+          <Button
+            type="submit"
+            fullWidth
+            variant="contained"
+            color="primary"
+            className={classes.submit}
+            size="large"
+          >
+            {loading ? <>
+              <CircularProgress size={24} />
+            </>
+            :
+            <>
+              Sign Up
+            </>}
+          </Button>
+          <Grid container justify="center">
+            <Grid item>
+              Already have an account? <Link to="/login">Login</Link>
+            </Grid>
+          </Grid>
+        </form>
       </div>
     </Container>
   )
