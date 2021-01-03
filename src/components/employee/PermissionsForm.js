@@ -16,7 +16,6 @@ export default function PermissionsForm({ permissions, employeePermissions }) {
   
   const renderCheckbox = (selectedData) => {
     const checkbox = []
-    console.log(permissions)
 
     permissions.map((permission) => {
       let selected = selectedData.length > 0 

@@ -9,6 +9,7 @@ import Login from '../login/Login';
 import Dashboard from '../dashboard/Dashboard';
 import NotFound from '../notFound/NotFound';
 import PreferenceNav from './PreferenceNav';
+import Suppliers from '../supplier/Supplier'
 import { usePermission } from '../../context/PermissionContext';
 import { PermissionConstants } from '../../constants/PermissionConstant';
 
@@ -23,6 +24,7 @@ import { Container, Drawer, List, ListItem, ListItemIcon, ListItemText, Menu, Me
 import CssBaseline from '@material-ui/core/CssBaseline';
 import { AccountCircle } from '@material-ui/icons';
 import Hidden from '@material-ui/core/Hidden';
+import SupplierProvider from '../../context/SupplierContext';
 
 export default function Navigation() {
 
@@ -223,6 +225,9 @@ export default function Navigation() {
             <PublicRoute name="Login" path="/login" component={Login} />
             <PrivateRoute name="Dashboard" exact path="/" component={Dashboard} />
             <PrivateRoute name="Preference" path="/preference" component={PreferenceNav} />
+            <SupplierProvider>
+              <PrivateRoute name="Suppliers" path="/suppliers" component={Suppliers} />
+            </SupplierProvider>
             <Route component={NotFound} />
           </Switch>
         </main>

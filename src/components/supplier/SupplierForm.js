@@ -1,14 +1,13 @@
 import React, { useEffect, useRef, useState } from 'react'
 
-import { useEmployee } from '../../context/EmployeeContext';
-import PermissionsForm from './PermissionsForm';
 import { modalView } from '../preference/Users';
 import Alert from '@material-ui/lab/Alert';
 import Grid from '@material-ui/core/Grid';
 import TextField from '@material-ui/core/TextField';
 import Button from '@material-ui/core/Button';
 import { makeStyles } from '@material-ui/core/styles';
-import { CircularProgress, InputAdornment, Typography, FormControl, InputLabel, Select, MenuItem, FormHelperText } from '@material-ui/core';
+import { CircularProgress, InputAdornment } from '@material-ui/core';
+import { useSupplier } from '../../context/SupplierContext';
 
 const useStyles = makeStyles((theme) => ({
   paper: {
@@ -46,7 +45,7 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-export default function EmployeeForm({ employee, mode }) {
+export default function SupplierForm({ supplier, mode }) {
   const formRef = useRef()
   
   const defaults = {
@@ -58,11 +57,8 @@ export default function EmployeeForm({ employee, mode }) {
   const [success, setSuccess] = useState(defaults)
   const [error, setError] = useState(defaults)
   const [loading, setLoading] = useState(false)
-  const [roles, setRoles] = useState([])
-  const [permissions, setPermissions] = useState([])
-  const [employeePermissions, setEmployeePermissions] = useState([])
 
-  const { getRoles, getPermissions, getRolePermission, updateEmployee, createEmployee } = useEmployee()
+  const { createSupplier, updateSupplier } = useSupplier()
 
   async function handleSubmit(e) {
     e.preventDefault(e)
@@ -70,8 +66,8 @@ export default function EmployeeForm({ employee, mode }) {
     setError(defaults)
     setLoading(true)
     
-    const { firstName,
-      lastName,
+    const { name,
+      contactPerson,
       countryCode,
       phoneNumber,
       email,
@@ -80,19 +76,11 @@ export default function EmployeeForm({ employee, mode }) {
       state,
       country,
       postalCode,
-      role,
-      permissions
     } = formRef.current
 
-    let permissionsArray = []
-
-    permissions.forEach((permission) => {
-      if (permission.checked) permissionsArray.push(permission.value)
-    })
-
     const formData = {
-      firstName: firstName.value,
-      lastName: lastName.value,
+      name: name.value,
+      contactPerson: contactPerson.value,
       countryCode: countryCode.value,
       phoneNumber: phoneNumber.value,
       email: email.value,
@@ -101,17 +89,15 @@ export default function EmployeeForm({ employee, mode }) {
       state: state.value,
       country: country.value,
       postalCode: postalCode.value,
-      role: role.value,
-      permissions: permissionsArray,
-      employeeId: employee.id
+      supplierId: supplier.id
     }
 
     let response
     
     if (mode === modalView.MODE_EDIT) {
-      response = await updateEmployee(formData)
+      response = await updateSupplier(formData)
     } else {
-      response = await createEmployee(formData)
+      response = await createSupplier(formData)
     }
 
     if (response.success) {
@@ -131,39 +117,6 @@ export default function EmployeeForm({ employee, mode }) {
     setLoading(false)
   }
 
-  async function handleOnRoleChange(event) {
-    const role = event.target.value
-    if (role) {
-      const response = await getRolePermission(role)
-  
-      if (response && response.success) {
-        setEmployeePermissions(response.data)
-      }
-    } else {
-      setEmployeePermissions([])
-    }
-  }
-
-  const rolesOptions = roles.length > 0
-		&& roles.map((role) => {
-    let selected = (employee && employee.roles && employee.roles[0].codeName === role.codeName)
-		return (
-			<MenuItem key={role.id} value={role.codeName} selected={selected}>{role.name}</MenuItem>
-		)
-	}, this);
-
-  useEffect(() => {
-    if (mode === modalView.MODE_EDIT) {
-      if (employee && employee.permissions.length > 0) setEmployeePermissions(employee.permissions)
-    }
-    getRoles().then((response) => {
-      setRoles(response.data)
-      getPermissions().then((response) => {
-        setPermissions(response.data)
-      })
-    })
-  }, [])
-
   const classes = useStyles();
 
   return (
@@ -178,30 +131,33 @@ export default function EmployeeForm({ employee, mode }) {
         <Grid container spacing={2}>
           <Grid item xs={12} md={6}>
             <TextField
-              autoComplete="firstname"
-              name="firstName"
+              autoComplete="name"
+              name="name"
               variant="outlined"
               fullWidth
-              id="firstName"
-              label="First Name"
-              error={!!error.data && !!error.data.firstName }
-              helperText={!!error.data && !!error.data.firstName && error.data.firstName}
-              defaultValue={employee.firstName}
+              id="name"
+              label="Name"
+              error={!!error.data && !!error.data.name }
+              helperText={!!error.data && !!error.data.name && error.data.name}
+              defaultValue={supplier.name}
+              disabled={mode === modalView.MODE_EDIT ? true : false}
             />
           </Grid>
+
           <Grid item xs={12} md={6}>
             <TextField
-              autoComplete="lastname"
+              autoComplete="name"
+              name="contactPerson"
               variant="outlined"
               fullWidth
-              id="lastName"
-              label="Last Name"
-              name="lastName"
-              error={!!error.data && !!error.data.lastName }
-              helperText={!!error.data && !!error.data.lastName && error.data.lastName}
-              defaultValue={employee.lastName}
+              id="contactPerson"
+              label="Contact Person"
+              error={!!error.data && !!error.data.name }
+              helperText={!!error.data && !!error.data.contactPerson && error.data.contactPerson}
+              defaultValue={supplier.contactPerson}
             />
           </Grid>
+
           <Grid item xs={4} md={2}>
             <TextField
               autoComplete="countryCode"
@@ -215,7 +171,7 @@ export default function EmployeeForm({ employee, mode }) {
               InputProps={{
                 startAdornment: <InputAdornment position="start">+</InputAdornment>,
               }}
-              defaultValue={employee.countryCode}
+              defaultValue={supplier.countryCode}
             />
           </Grid>
           <Grid item xs={8} md={4}>
@@ -228,7 +184,7 @@ export default function EmployeeForm({ employee, mode }) {
               name="phoneNumber"
               error={!!error.data && !!error.data.phoneNumber }
               helperText={!!error.data && !!error.data.phoneNumber && error.data.phoneNumber}
-              defaultValue={employee.phoneNumber}
+              defaultValue={supplier.phoneNumber}
             />
           </Grid>
           <Grid item xs={12} md={6}>
@@ -241,7 +197,7 @@ export default function EmployeeForm({ employee, mode }) {
               autoComplete="email"
               error={!!error.data && !!error.data.email }
               helperText={!!error.data && !!error.data.email && error.data.email}
-              defaultValue={employee.email}
+              defaultValue={supplier.email}
             />
           </Grid>
           <Grid item xs={12}>
@@ -254,7 +210,7 @@ export default function EmployeeForm({ employee, mode }) {
               autoComplete="address"
               error={!!error.data && !!error.data.address }
               helperText={!!error.data && !!error.data.address && error.data.address}
-              defaultValue={employee.address}
+              defaultValue={supplier.address}
             />
           </Grid>
           <Grid item xs={12} md={3}>
@@ -267,7 +223,7 @@ export default function EmployeeForm({ employee, mode }) {
               autoComplete="city"
               error={!!error.data && !!error.data.city }
               helperText={!!error.data && !!error.data.city && error.data.city}
-              defaultValue={employee.city}
+              defaultValue={supplier.city}
             />
           </Grid>
           <Grid item xs={12} md={3}>
@@ -280,7 +236,7 @@ export default function EmployeeForm({ employee, mode }) {
               autoComplete="state"
               error={!!error.data && !!error.data.state }
               helperText={!!error.data && !!error.data.state && error.data.state}
-              defaultValue={employee.state}
+              defaultValue={supplier.state}
             />
           </Grid>
           <Grid item xs={12} md={3}>
@@ -293,7 +249,7 @@ export default function EmployeeForm({ employee, mode }) {
               autoComplete="postalCode"
               error={!!error.data && !!error.data.postalCode }
               helperText={!!error.data && !!error.data.postalCode && error.data.postalCode}
-              defaultValue={employee.postalCode}
+              defaultValue={supplier.postalCode}
             />
           </Grid>
           <Grid item xs={12} md={3}>
@@ -306,46 +262,8 @@ export default function EmployeeForm({ employee, mode }) {
               autoComplete="country"
               error={!!error.data && !!error.data.country }
               helperText={!!error.data && !!error.data.country && error.data.country}
-              defaultValue={employee.country}
+              defaultValue={supplier.country}
             />
-          </Grid>
-        </Grid>
-        <hr />
-        <Grid container spacing={2}>
-          <Grid item xs={12} md={4}>
-            <Typography variant="h6" color="textPrimary" component="h6" className={classes.secondaryHeading}>
-              Roles
-            </Typography>
-            <FormControl variant="outlined" className={classes.formControl}
-              error={!!error.data && !!error.data.role }
-              >
-              <InputLabel id="demo-simple-select-outlined-label">Role</InputLabel>
-              <Select
-                labelId="demo-simple-select-outlined-label"
-                id="demo-simple-select-outlined"
-                defaultValue={employee.roles && employee.roles[0].codeName}
-                onChange={handleOnRoleChange}
-                label="Role"
-                name="role"
-              >
-                <MenuItem value="">
-                  <em>None</em>
-                </MenuItem>
-                {rolesOptions}
-              </Select>
-              <FormHelperText>{!!error.data && !!error.data.role && error.data.role}</FormHelperText>
-            </FormControl>
-          </Grid>
-          <Grid item xs={12} md={8}>
-            <Typography variant="h6" color="textPrimary" component="h6" className={classes.secondaryHeading}>
-              Permissions
-            </Typography>
-            <Grid container spacing={2}>
-              <PermissionsForm 
-                permissions={permissions}
-                employeePermissions={employeePermissions}
-              />
-            </Grid>
           </Grid>
         </Grid>
         <Button

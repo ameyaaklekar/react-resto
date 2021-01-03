@@ -95,7 +95,7 @@ export default function Users() {
         color="primary" 
         onClick={createEmployee}
         className={classes.createEmployeeBtn}>
-        Create New Employee
+        Add Employee
       </Button>
       <TableContainer component={Paper}>
         <Table aria-label="collapsible table" className={classes.table}>
