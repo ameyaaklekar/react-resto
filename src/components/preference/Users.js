@@ -162,11 +162,11 @@ export default function Users() {
                           primary="Address"
                           secondary={
                             <Typography variant="body2" color="textSecondary" component="p">
-                              {employee.address} <br/>
-                              {employee.city} <br/>
-                              {employee.state} <br/>
-                              {employee.postalCode} <br/>
-                              {employee.country} <br/>
+                              {employee.address} {employee.address && <br/>}
+                              {employee.city} {employee.city && <br/>}
+                              {employee.state} {employee.state && <br/>}
+                              {employee.postalCode} {employee.postalCode && <br/>}
+                              {employee.country} {employee.country && <br/>}
                             </Typography>
                           }
                         />

@@ -169,11 +169,11 @@ export default function Supplier() {
                             primary="Address"
                             secondary={
                               <Typography variant="body2" color="textSecondary" component="p">
-                                {supplier.address} <br/>
-                                {supplier.city} <br/>
-                                {supplier.state} <br/>
-                                {supplier.postalCode} <br/>
-                                {supplier.country} <br/>
+                                {supplier.address} {supplier.address && <br/>}
+                                {supplier.city} {supplier.city && <br/>}
+                                {supplier.state} {supplier.state && <br/>}
+                                {supplier.postalCode} {supplier.postalCode && <br/>}
+                                {supplier.country} {supplier.country && <br/>}
                               </Typography>
                             }
                           />

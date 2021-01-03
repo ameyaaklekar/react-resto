@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useRef, useState } from 'react'
 
 import { modalView } from '../preference/Users';
 import Alert from '@material-ui/lab/Alert';

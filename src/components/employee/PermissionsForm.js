@@ -19,7 +19,7 @@ export default function PermissionsForm({ permissions, employeePermissions }) {
 
     permissions.map((permission) => {
       let selected = selectedData.length > 0 
-        && selectedData.filter((selected) => selected.codeName == permission.codeName)
+        && selectedData.filter((selected) => selected.codeName === permission.codeName)
 
         checkbox.push({
           id: permission.id,
